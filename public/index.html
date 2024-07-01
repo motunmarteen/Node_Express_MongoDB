@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoMyCode Registrations</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>GOMYCODE REGISTRATION FORM</h1>
+    <form id="registrationForm" action="/submit" method="POST">
+        <label for="full_name">Full Name:</label>
+        <input type="text" id="full_name" name="full_name" required>
+        
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+        
+        <label for="age">Age:</label>
+        <input type="number" id="age" name="age" required>
+        
+        <label for="experience">Do you have any prior coding experience?</label>
+        <select id="experience" name="experience" required>
+            <option value="none">None</option>
+            <option value="beginner">Beginner</option>
+            <option value="intermediate">Intermediate</option>
+            <option value="advanced">Advanced</option>
+        </select>
+        
+        <label for="motivation">Why do you want to learn coding at GoMyCode?</label>
+        <textarea id="motivation" name="motivation" rows="4" required></textarea>
+        
+        <label for="course_interest">Which course are you most interested in?</label>
+        <select id="course_interest" name="course_interest" required>
+            <option value="frontend">Frontend Development</option>
+            <option value="backend">Backend Development</option>
+            <option value="fullstack">Fullstack Development</option>
+            <option value="data_science">Data Science</option>
+            <option value="cyber_security">Cybersecurity</option>
+            <option value="ui_ux">UI/UX Design</option>
+        </select>
+        
+        <label for="commitment">Are you able to commit to a full-time or part-time schedule?</label>
+        <select id="commitment" name="commitment" required>
+            <option value="full_time">Full-time</option>
+            <option value="part_time">Part-time</option>
+        </select>
+        
+        <button type="submit" value="submit">Register</button>
+    </form>
+
+    <br><br><br><hr><hr><hr><br><br><br>
+
+    <h2>Search Registrations</h2>
+    <form id="searchForm" onsubmit="searchRegistrations(event)">
+        <label for="searchQuery">Search by Name or ID:</label>
+        <input type="text" id="searchQuery" name="searchQuery" required>
+        <button type="submit">Search</button>
+    </form>
+
+    <br><br><br><hr><hr><hr><br><br><br>
+
+    <div id="registrations"></div>
+
+    <script>
+        async function fetchRegistrations() {
+            const response = await fetch('/registrations');
+            const data = await response.json();
+            displayRegistrations(data);
+        }
+
+        function displayRegistrations(data) {
+            const registrationsDiv = document.getElementById('registrations');
+            registrationsDiv.innerHTML = '';
+            data.forEach(registration => {
+                const registrationDiv = document.createElement('div');
+                registrationDiv.innerHTML = `
+                    <h3>${registration.full_name}</h3>
+                    <p>Email: ${registration.email}</p>
+                    <p>Age: ${registration.age}</p>
+                    <p>Experience: ${registration.experience}</p>
+                    <p>Motivation: ${registration.motivation}</p>
+                    <p>Course Interest: ${registration.course_interest}</p>
+                    <p>Commitment: ${registration.commitment}</p>
+                    <button onclick="editRegistration('${registration._id}')">Edit</button>
+                    <button onclick="deleteRegistration('${registration._id}')">Delete</button>
+                `;
+                registrationsDiv.appendChild(registrationDiv);
+            });
+        }
+
+        async function editRegistration(id) {
+            const registration = await fetch(`/registrations/${id}`).then(res => res.json());
+
+            const full_name = prompt('Enter new full name:', registration.full_name);
+            const email = prompt('Enter new email:', registration.email);
+            const age = prompt('Enter new age:', registration.age);
+            const experience = prompt('Enter new experience (none, beginner, intermediate, advanced):', registration.experience);
+            const motivation = prompt('Enter new motivation:', registration.motivation);
+            const course_interest = prompt('Enter new course interest (frontend, backend, fullstack, data_science, cyber_security, ui_ux):', registration.course_interest);
+            const commitment = prompt('Enter new commitment (full_time, part_time):', registration.commitment);
+
+            const updatedData = { full_name, email, age, experience, motivation, course_interest, commitment };
+
+            const response = await fetch(`/registrations/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updatedData),
+            });
+            if (response.ok) {
+                alert('Registration updated successfully!');
+                fetchRegistrations();
+            } else {
+                alert('Error updating registration.');
+            }
+        }
+
+        async function deleteRegistration(id) {
+            const response = await fetch(`/registrations/${id}`, {
+                method: 'DELETE',
+            });
+            if (response.ok) {
+                alert('Registration deleted successfully!');
+                fetchRegistrations();
+            } else {
+                alert('Error deleting registration.');
+            }
+        }
+
+        async function searchRegistrations(event) {
+            event.preventDefault();
+            const query = document.getElementById('searchQuery').value;
+            const response = await fetch(`/search?q=${query}`);
+            const data = await response.json();
+            displayRegistrations(data);
+        }
+
+        fetchRegistrations();
+    </script>
+</body>
+</html>
