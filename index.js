@@ -3,16 +3,13 @@ import { dirname } from "path";
 import { fileURLToPath } from "url";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
-import Registration from "./models/registration.js"; // Adjust the path as necessary
+import Registration from "./models/registration.js";
 
 // Initialize Express app
 const app = express();
 
 // Middleware to parse JSON bodies
 app.use(express.json());
-
-// Middleware to parse URL-encoded bodies
-app.use(bodyParser.urlencoded({ extended: true }));
 
 // Resolve __dirname in ES6 modules
 const __dirname = dirname(fileURLToPath(import.meta.url));
