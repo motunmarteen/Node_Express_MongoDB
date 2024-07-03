@@ -10,12 +10,13 @@ const app = express();
 
 // Middleware to parse JSON bodies
 app.use(express.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // Resolve __dirname in ES6 modules
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PORT = 2000;
 
-// Database Connection
+// MongoDB Database Connection
 mongoose
   .connect("mongodb://localhost:27017/GoMyCode", {
     useNewUrlParser: true,
@@ -36,7 +37,7 @@ app.post("/submit", async (req, res) => {
   try {
     const registrationData = new Registration(req.body);
     await registrationData.save();
-    res.status(200).send("Registration successful!");
+    res.status(200).send("<h2>Form Submitted Successfully</h2>");
   } catch (error) {
     console.error("Error during registration:", error);
     res.status(500).send("An error occurred during registration.");
